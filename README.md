@@ -9,6 +9,10 @@
     <p>Palavras-chave: Cadeia de Markov; Contexto; Estados.
 </details>
 
+## Sumário
+1. [Gerador interativo de Cadeias de Markov](/1-geradorDeCadeia/geradorDeCadeia.c);
+
+
 ## Créditos
 - Autor/Pesquisador: Pedro Henrique Estevam Vaz de Melo ([Lattes](http://lattes.cnpq.br/4701671818864841));
 - Professor/Orientador: Silvio Alvez Souza ([Lattes](http://lattes.cnpq.br/7731663662793325)).
