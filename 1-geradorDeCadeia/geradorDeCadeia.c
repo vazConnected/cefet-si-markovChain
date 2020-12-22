@@ -146,7 +146,7 @@ int main(){
 
     int ultimoElementoDaCadeia = -1;
     long tamanhoDaCadeia; // Quantidade de elementos a serem gerados e salvos no arquivo
-    int variedadeDaCadeia; // Diversidade de elementos singulares a serem salvos na cadei (varia de 1 a 10)
+    int variedadeDaCadeia; // Diversidade de elementos singulares a serem salvos na cadeia (varia de 1 a 10)
     char* caminhoParaArquivo = (char*) malloc(2048 * sizeof(char));
 
     entrada_tamanhoVariedade(&tamanhoDaCadeia, &variedadeDaCadeia);
@@ -165,7 +165,7 @@ int main(){
     }
     
     // Entradas para o vetor de distrubuicao geral
-    printf("\n\nEntradas para o vetor de distribuicao inicial:\n");
+    printf("\n\nEntradas para o vetor de distribuicao inicial :\n");
     double somatorioVetorDistribuicaoInicial = 0.0;
     while(somatorioVetorDistribuicaoInicial != 1.0){
         for(int i = 0; i < variedadeDaCadeia; i++){
@@ -180,7 +180,7 @@ int main(){
     }
 
     // Entradas para a matriz de Transicao
-    printf("\n\nEntradas para a matriz de transicao:\n");
+    printf("\n\nEntradas para a matriz de transicao :\n");
     for(int i = 0; i < variedadeDaCadeia; i++){
         double somatorioDeLinha = 0;
         for(int j = 0; j < variedadeDaCadeia; j++){
@@ -215,10 +215,10 @@ int main(){
         printf("%d ", ultimoElementoDaCadeia);
     }while(elementosGerados < tamanhoDaCadeia);
     
-    printf("\n\nCadeia Gerada! Elementos salvos em: %s", caminhoParaArquivo);
+    printf("\n\nCadeia Gerada! Elementos salvos em : %s", caminhoParaArquivo);
 
     // Preenchendo distribuicao geral
-    printf("\n\nDistribuicao geral da cadeia:");
+    printf("\n\nDistribuicao geral da cadeia :");
     for(int i = 0; i < variedadeDaCadeia; i++){
         distribuicaoGeral[i] = (double) ocupacaoNaCadeia[i] / (double) tamanhoDaCadeia;
         printf("\n\tElemento %d : %lf", i, distribuicaoGeral[i]);
