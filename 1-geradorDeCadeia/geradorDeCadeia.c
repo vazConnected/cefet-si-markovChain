@@ -16,6 +16,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include <math.h>
 
 void imprimirIntro(){
     #ifdef __unix__
@@ -32,11 +33,11 @@ void imprimirIntro(){
 
 void entrada_tamanhoVariedade(long *tamanhoDaCadeia, int *variedadeDaCadeia){
     do{
-        printf("\n\tDigite a variedade da cadeia a ser gerada (1-10) : ");
+        printf("\n\tDigite o espaco de estados E (0,1,2,...,E-1) (max.: 9) : ");
         scanf("%d", variedadeDaCadeia);
 
         if(*variedadeDaCadeia < 0 || *variedadeDaCadeia > 10)
-            printf("\n\tERRO! A variedade deve ser entre 1 e 10 (intervalo fechado) : ");
+            printf("\n\tERRO! O espaco de estados deve ser entre 1 e 10 (intervalo fechado).");
     }while(*variedadeDaCadeia < 0 || *variedadeDaCadeia > 10);
     
     printf("\tDigite o tamanho da cadeia a ser gerada : ");
@@ -46,7 +47,7 @@ void entrada_tamanhoVariedade(long *tamanhoDaCadeia, int *variedadeDaCadeia){
 void entrada_caminhoParaArquivo(char* caminhoParaArquivo){
     bool arquivoExiste = false;
     do{
-        printf("\tDigite o nome do arquivo a ser salva a cadeia (max. 2048 char): ");
+        printf("\tDigite o nome do arquivo a ser salva a cadeia (max. 4096 char): ");
         scanf("%s", caminhoParaArquivo);
 
         FILE* arquivo = fopen(caminhoParaArquivo, "w");
@@ -140,6 +141,22 @@ void calcularDistribuicaoGeral(long* ocupacaoNaCadeia, double* distribuicaoGeral
     }
 }
 
+bool somatorioValido(double* vetor, int tamanho){
+    /* Fix: bug que nao valida o somatorio em uma ordem especifica
+     *   Motivado pelo erro na validacao ca comparacao  (0.7 + 0.2 + 0.1) != 1, que resultava como menor
+     */
+    
+    double somatorio = 0.0;
+    for(int i = 0; i < tamanho; i++){
+        somatorio += vetor[i];
+    }
+
+    if( abs(somatorio - 1) == 0.0 )
+        return true;
+
+    return false;
+}
+
 int main(){
     imprimirIntro();
     srand(time(NULL));
@@ -147,51 +164,56 @@ int main(){
     int ultimoElementoDaCadeia = -1;
     long tamanhoDaCadeia; // Quantidade de elementos a serem gerados e salvos no arquivo
     int variedadeDaCadeia; // Diversidade de elementos singulares a serem salvos na cadeia (varia de 1 a 10)
-    char* caminhoParaArquivo = (char*) malloc(2048 * sizeof(char));
+    char* caminhoParaArquivo = (char*) malloc(4096 * sizeof(char));
 
     entrada_tamanhoVariedade(&tamanhoDaCadeia, &variedadeDaCadeia);
     entrada_caminhoParaArquivo(caminhoParaArquivo);    
 
-    // Alocacao de memoria
-    double matrizDeTransicao[variedadeDaCadeia][variedadeDaCadeia];
-    double distribuicaoInicial[variedadeDaCadeia];
-    double distribuicaoGeral[variedadeDaCadeia];
-    long ocupacaoNaCadeia[variedadeDaCadeia];
-    
-    // Zerando as distribuicao e ocupacao gerais
+    double* distribuicaoInicial = (double*) malloc(variedadeDaCadeia * sizeof(double));
+    double* distribuicaoGeral = (double*) malloc(variedadeDaCadeia * sizeof(double));
+    long* ocupacaoNaCadeia = (long*) malloc(variedadeDaCadeia * sizeof(long));
+
+    double** matrizDeTransicao = (double**) malloc(variedadeDaCadeia * sizeof(double*));
     for(int i = 0; i < variedadeDaCadeia; i++){
+        matrizDeTransicao[i] = (double*) malloc(variedadeDaCadeia * sizeof(double));
+    }
+    
+    // Zerando as distribuicaoes e ocupacao
+    for(int i = 0; i < variedadeDaCadeia; i++){
+        distribuicaoInicial[i] = 0.0;
         distribuicaoGeral[i] = 0.0;
         ocupacaoNaCadeia[i] = 0;
     }
     
-    // Entradas para o vetor de distrubuicao geral
+    // Entradas para o vetor de distrubuicao inicial
     printf("\n\nEntradas para o vetor de distribuicao inicial :\n");
-    double somatorioVetorDistribuicaoInicial = 0.0;
-    while(somatorioVetorDistribuicaoInicial != 1.0){
+    bool somatorioValidado = false;
+    while(!somatorioValidado){
         for(int i = 0; i < variedadeDaCadeia; i++){
             printf("\tDistribuicao inicial para o elemento %d : ", i);
             scanf("%lf", &distribuicaoInicial[i]);
-            somatorioVetorDistribuicaoInicial += distribuicaoInicial[i];
         }
-        if(somatorioVetorDistribuicaoInicial != 1.0){
-            printf("\n\tERRO. O somatorio dos valores no vetor de distribuicao inicial deve totalizar 1 (100 porcento). Tente novamente!\n");
-            somatorioVetorDistribuicaoInicial = 0.0;
+        somatorioValidado = somatorioValido(distribuicaoInicial, variedadeDaCadeia);
+        if(!somatorioValidado){
+            printf("\n\tERRO. O somatorio dos valores no vetor de distribuicao inicial deve totalizar 1.0 (100 porcento). Tente novamente!\n");
         }
     }
 
     // Entradas para a matriz de Transicao
     printf("\n\nEntradas para a matriz de transicao :\n");
     for(int i = 0; i < variedadeDaCadeia; i++){
-        double somatorioDeLinha = 0;
+        double vetorLinhaAtual[variedadeDaCadeia];
         for(int j = 0; j < variedadeDaCadeia; j++){
             printf("\tTransicao de %d para %d : ", i, j);
             scanf("%lf", &matrizDeTransicao[i][j]);
-            somatorioDeLinha += matrizDeTransicao[i][j];
+            vetorLinhaAtual[i] = matrizDeTransicao[i][j];
         }
-        if(somatorioDeLinha != 1.0){
-            printf("\nERRO! o somatorio dos valores linha da matriz de transicao devem totalizar 1.0, ou seja, 100 porcento.\n");
+        somatorioValidado = somatorioValido(vetorLinhaAtual, variedadeDaCadeia);
+        if(!somatorioValidado){
+            printf("\nERRO! o somatorio dos valores linha da matriz de transicao devem totalizar 1.0 (100 porcento). Tente novamente!\n");
             i--;
         }
+        printf("\n");
     }
 
     // Geracao dos elementos da cadeia
@@ -218,7 +240,7 @@ int main(){
     printf("\n\nCadeia Gerada! Elementos salvos em : %s", caminhoParaArquivo);
 
     // Preenchendo distribuicao geral
-    printf("\n\nDistribuicao geral da cadeia :");
+    printf("\n\nDistribuicao invariante da cadeia :");
     for(int i = 0; i < variedadeDaCadeia; i++){
         distribuicaoGeral[i] = (double) ocupacaoNaCadeia[i] / (double) tamanhoDaCadeia;
         printf("\n\tElemento %d : %lf", i, distribuicaoGeral[i]);
