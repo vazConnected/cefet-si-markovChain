@@ -15,5 +15,5 @@
 
 
 ## Créditos
-- Autor/Pesquisador: Pedro Henrique Estevam Vaz de Melo ([Lattes](http://lattes.cnpq.br/4701671818864841));
-- Professor/Orientador: Silvio Alvez Souza ([Lattes](http://lattes.cnpq.br/7731663662793325)).
+- Autor/Pesquisador: Pedro Vaz ([Lattes](http://lattes.cnpq.br/4701671818864841));
+- Professor/Orientador: Silvio Alvez ([Lattes](http://lattes.cnpq.br/7731663662793325)).

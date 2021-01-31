@@ -3,7 +3,7 @@
  * Descricao: algoritmo interativo para a interação de Cadeias de
  *   Markov e salvar informacoes em arquivo texto
  * 
- * Autor: Pedro Henrique Estevam Vaz de Melo
+ * Autor: Pedro Vaz
  * Data: dezembro de 2020 
  * 
  * Software relacionado aa IC "Estimacao de Cadeias de Markov com

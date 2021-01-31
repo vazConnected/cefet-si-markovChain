@@ -3,7 +3,7 @@
  * Descricao: algoritmo que extrai informacoes (matriz de transicao
  *   e distribuicao geral) de uma cadeia de algarismos salva em um arquivo
  * 
- * Autor: Pedro Henrique Estevam Vaz de Melo
+ * Autor: Pedro Vaz
  * Data: dezembro de 2020 
  * 
  * Software relacionado aa IC "Estimacao de Cadeias de Markov com
