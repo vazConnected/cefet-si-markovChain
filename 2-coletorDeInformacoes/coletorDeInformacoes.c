@@ -3,7 +3,7 @@
  * Descricao: algoritmo que extrai informacoes (matriz de transicao
  *   e distribuicao geral) de uma cadeia de algarismos salva em um arquivo
  * 
- * Autor: Pedro Vaz
+ * Autor: Pedro Henrique Estevam Vaz de Melo
  * Data: dezembro de 2020 
  * 
  * Software relacionado aa IC "Estimacao de Cadeias de Markov com
@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define TAMANHO 10
+#define TAMANHO 10 // Qtd de algarismos analisados
 
 void imprimirIntro(){
     #ifdef __unix__
@@ -83,20 +83,14 @@ int charParaAlgarismo(char c){
 int main(){
     imprimirIntro();
 
-    char* caminhoParaArquivo = (char*) malloc(4096 * sizeof(char));
-
-    int variedadeDaCadeia = 0;
-
-    double distribuicaoGeral[TAMANHO];
-    long quantidadeDeElementosCapturadosPorAlgarismo[TAMANHO];
-
-    long contadorDeTransicoes[TAMANHO][TAMANHO];
-    double matrizDeTransicoes[TAMANHO][TAMANHO];
-
     long tamanhoDaCadeia = 0; // Elementos validos identificados
     long quantidadeDeElementosIgnorados = 0; // Elementos que nao sao algarismos
 
-    // Zerando elementos dos vetores e matrizes
+    // Declaracao e inicializacao dos elementos dos vetores e matrizes
+    double distribuicaoGeral[TAMANHO];
+    double matrizDeTransicoes[TAMANHO][TAMANHO];
+    long contadorDeTransicoes[TAMANHO][TAMANHO];
+    long quantidadeDeElementosCapturadosPorAlgarismo[TAMANHO];
     for(int i = 0; i < TAMANHO; i++){
         distribuicaoGeral[i] = 0.0;
         quantidadeDeElementosCapturadosPorAlgarismo[i] = 0;
@@ -106,6 +100,8 @@ int main(){
         }
     }
 
+    // Entrada para o caminho do arquivo
+    char* caminhoParaArquivo = (char*) malloc(4096 * sizeof(char));
     entrada_caminhoParaArquivo(caminhoParaArquivo);
 
     printf("\n\nCalculando estatisticas sobre a cadeia armazenada no arquivo %s", caminhoParaArquivo);
@@ -138,7 +134,7 @@ int main(){
             int algarismoCapturado = charParaAlgarismo(charCapturado);
 
             contadorDeTransicoes[ ultimosElementosDaCadeia[1] ][ algarismoCapturado ]++;
-            distribuicaoGeral[ algarismoCapturado ]++;
+            distribuicaoGeral[algarismoCapturado]++;
 
             quantidadeDeElementosCapturadosPorAlgarismo[ algarismoCapturado ]++;
 
@@ -154,6 +150,7 @@ int main(){
     fclose(arquivo);
 
     // Calcula a variedade da cadeia
+    int variedadeDaCadeia = 0;
     for(int i = 0; i < TAMANHO; i++){
         if(quantidadeDeElementosCapturadosPorAlgarismo[i] != 0){
             variedadeDaCadeia++;
@@ -165,30 +162,32 @@ int main(){
         distribuicaoGeral[i] = quantidadeDeElementosCapturadosPorAlgarismo[i] / (double) tamanhoDaCadeia;
     }
 
-    long somatorioDaLinha[TAMANHO];
+    // Inicializando vetor com a quantidade de ocorrencias dos algarismos
+    long qtdDeOcorrenciaDosAlgarismos[TAMANHO];
     for(int i = 0; i < TAMANHO; i++){
-        somatorioDaLinha[i] = 0;
+        qtdDeOcorrenciaDosAlgarismos[i] = 0;
     }
 
-    // Calcula somatorio das linhas
+    // Preenche o vetor com a quantidade de ocorrencias dos algarismos
     for(int i = 0; i < TAMANHO; i++){
         for(int j = 0; j < TAMANHO; j++){
-            somatorioDaLinha[i] += contadorDeTransicoes[i][j];
+            qtdDeOcorrenciaDosAlgarismos[i] += contadorDeTransicoes[i][j];
         }
     }
     
     // Calcula matriz de transicao
     for(int i = 0; i < TAMANHO; i++){
         for(int j = 0; j < TAMANHO; j++){
-            if(contadorDeTransicoes[i][j] == 0)
+            if(contadorDeTransicoes[i][j] == 0){
                 matrizDeTransicoes[i][j] = 0.0;
-            else
-                matrizDeTransicoes[i][j] = (double) contadorDeTransicoes[i][j] / (double) somatorioDaLinha[i];
+            }else{
+                matrizDeTransicoes[i][j] = (double) contadorDeTransicoes[i][j] / (double) qtdDeOcorrenciaDosAlgarismos[i];
+            }
         }
     }
     
+    // Imprimindo estatísticas coletadas
     printf("\n\nEstatísticas da cadeia :");
-
     printf("\n\tVariedade da cadeia : %d elemento(s)", variedadeDaCadeia);
     printf("\n\tQuantidade de elementos capturados : %lu", tamanhoDaCadeia);
     printf("\n\tQuantidade de elementos ignorados por nao serem algarismos : %lu", quantidadeDeElementosIgnorados);
