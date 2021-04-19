@@ -3,7 +3,7 @@
  * Descricao: algoritmo interativo para a interação de Cadeias de
  *   Markov e salvar informacoes em arquivo texto
  * 
- * Autor: Pedro Vaz
+ * Autor: Pedro Henrique Estevam Vaz de Melo
  * Data: dezembro de 2020 
  * 
  * Software relacionado aa IC "Estimacao de Cadeias de Markov com
@@ -31,14 +31,14 @@ void imprimirIntro(){
     printf("\nData: dezembro de 2020.\n");
 }
 
-void entrada_tamanhoVariedade(long *tamanhoDaCadeia, int *variedadeDaCadeia){
+void entrada_tamanhoDoAlfabeto(long *tamanhoDaCadeia, int *tamanhoDoAlfabeto){
     do{
-        printf("\n\tDigite o espaco de estados E (0,1,2,...,E-1) (max.: 9) : ");
-        scanf("%d", variedadeDaCadeia);
+        printf("\n\tDigite o espaco de estados (tamanho do alfabeto) : ");
+        scanf("%d", tamanhoDoAlfabeto);
 
-        if(*variedadeDaCadeia < 0 || *variedadeDaCadeia > 10)
+        if(*tamanhoDoAlfabeto < 0 || *tamanhoDoAlfabeto > 10)
             printf("\n\tERRO! O espaco de estados deve ser entre 1 e 10 (intervalo fechado).");
-    }while(*variedadeDaCadeia < 0 || *variedadeDaCadeia > 10);
+    }while(*tamanhoDoAlfabeto < 0 || *tamanhoDoAlfabeto > 10);
     
     printf("\tDigite o tamanho da cadeia a ser gerada : ");
     scanf("%ld", tamanhoDaCadeia);
@@ -54,7 +54,7 @@ void entrada_caminhoParaArquivo(char* caminhoParaArquivo){
         if(arquivo != NULL){
             arquivoExiste = true;
         }else{
-            printf("\n\tERRO! O arquivo nao existe. Tente novamente.");
+            printf("\n\tErro ao criar o arquivo. Tente novamente.");
         }
     }while(!arquivoExiste);
 
@@ -62,17 +62,17 @@ void entrada_caminhoParaArquivo(char* caminhoParaArquivo){
     caminhoParaArquivo = (char*) realloc (caminhoParaArquivo, tamanhoDaString);
 }
 
-int geradorDeElemento(double *copiaLinhaTransicao, int variedadeDaCadeia){
-    int idElementos[variedadeDaCadeia];
+int geradorDeElemento(double *copiaLinhaTransicao, int tamanhoDoAlfabeto){
+    int idElementos[tamanhoDoAlfabeto];
 
     // Preenchendo o vetor de  identificacao dos elementos
-    for(int i = 0; i < variedadeDaCadeia; i++){
+    for(int i = 0; i < tamanhoDoAlfabeto; i++){
         idElementos[i] = i;
     }
     
     // Organizando elementos da linha da matriz de transicao em ordem crescente
-    for(int i = 0; i < variedadeDaCadeia; i++){
-        for(int j = i; j < variedadeDaCadeia; j++){
+    for(int i = 0; i < tamanhoDoAlfabeto; i++){
+        for(int j = i; j < tamanhoDoAlfabeto; j++){
             if(copiaLinhaTransicao[j] < copiaLinhaTransicao[i]){
                 double auxLinhaTransicao = copiaLinhaTransicao[i];
                 copiaLinhaTransicao[i] = copiaLinhaTransicao[j];
@@ -92,7 +92,7 @@ int geradorDeElemento(double *copiaLinhaTransicao, int variedadeDaCadeia){
     // Selecao do proximo elemento da cadeia
     int elementoGerado = -1;
     double somatorioDeRazoes = 0.0;
-    for(int i = 0; i < variedadeDaCadeia ; i++){
+    for(int i = 0; i < tamanhoDoAlfabeto ; i++){
         if(razao >= somatorioDeRazoes && razao <= ( somatorioDeRazoes + copiaLinhaTransicao[i] )){
             elementoGerado = idElementos[i];
             break;
@@ -141,45 +141,31 @@ void calcularDistribuicaoGeral(long* ocupacaoNaCadeia, double* distribuicaoGeral
     }
 }
 
-bool somatorioValido(double* vetor, int tamanho){
-    /* Fix: bug que nao valida o somatorio em uma ordem especifica
-     *   Motivado pelo erro na validacao ca comparacao  (0.7 + 0.2 + 0.1) != 1, que resultava como menor
-     */
-    
-    double somatorio = 0.0;
-    for(int i = 0; i < tamanho; i++){
-        somatorio += vetor[i];
-    }
-
-    if( abs(somatorio - 1) == 0.0 )
-        return true;
-
-    return false;
-}
 
 int main(){
-    imprimirIntro();
     srand(time(NULL));
+    imprimirIntro();
+    
+    // Entrada para o tamanho do alfabeto
+    long tamanhoDaCadeia;
+    int tamanhoDoAlfabeto; // Diversidade de elementos do alfabeto (varia de 1 a 10)
+    entrada_tamanhoDoAlfabeto(&tamanhoDaCadeia, &tamanhoDoAlfabeto);
 
-    int ultimoElementoDaCadeia = -1;
-    long tamanhoDaCadeia; // Quantidade de elementos a serem gerados e salvos no arquivo
-    int variedadeDaCadeia; // Diversidade de elementos singulares a serem salvos na cadeia (varia de 1 a 10)
+    // Entrada para o caminho do arquivo
     char* caminhoParaArquivo = (char*) malloc(4096 * sizeof(char));
-
-    entrada_tamanhoVariedade(&tamanhoDaCadeia, &variedadeDaCadeia);
     entrada_caminhoParaArquivo(caminhoParaArquivo);    
 
-    double* distribuicaoInicial = (double*) malloc(variedadeDaCadeia * sizeof(double));
-    double* distribuicaoGeral = (double*) malloc(variedadeDaCadeia * sizeof(double));
-    long* ocupacaoNaCadeia = (long*) malloc(variedadeDaCadeia * sizeof(long));
-
-    double** matrizDeTransicao = (double**) malloc(variedadeDaCadeia * sizeof(double*));
-    for(int i = 0; i < variedadeDaCadeia; i++){
-        matrizDeTransicao[i] = (double*) malloc(variedadeDaCadeia * sizeof(double));
+    // Alocacao dinamica da matriz de transicao
+    double** matrizDeTransicao = (double**) malloc(tamanhoDoAlfabeto * sizeof(double*));
+    for(int i = 0; i < tamanhoDoAlfabeto; i++){
+        matrizDeTransicao[i] = (double*) malloc(tamanhoDoAlfabeto * sizeof(double));
     }
     
-    // Zerando as distribuicaoes e ocupacao
-    for(int i = 0; i < variedadeDaCadeia; i++){
+    // Inicializando distribuicaoes e ocupacao
+    double* distribuicaoInicial = (double*) malloc(tamanhoDoAlfabeto * sizeof(double));
+    double* distribuicaoGeral = (double*) malloc(tamanhoDoAlfabeto * sizeof(double));
+    long* ocupacaoNaCadeia = (long*) malloc(tamanhoDoAlfabeto * sizeof(long));
+    for(int i = 0; i < tamanhoDoAlfabeto; i++){
         distribuicaoInicial[i] = 0.0;
         distribuicaoGeral[i] = 0.0;
         ocupacaoNaCadeia[i] = 0;
@@ -187,30 +173,33 @@ int main(){
     
     // Entradas para o vetor de distrubuicao inicial
     printf("\n\nEntradas para o vetor de distribuicao inicial :\n");
-    bool somatorioValidado = false;
-    while(!somatorioValidado){
-        for(int i = 0; i < variedadeDaCadeia; i++){
+    double somatorioDeEntradas = 0.0;
+    while(somatorioDeEntradas != 1.0){
+        somatorioDeEntradas = 0.0;
+        for(int i = 0; i < tamanhoDoAlfabeto; i++){
             printf("\tDistribuicao inicial para o elemento %d : ", i);
             scanf("%lf", &distribuicaoInicial[i]);
+            somatorioDeEntradas += distribuicaoInicial[i];
         }
-        somatorioValidado = somatorioValido(distribuicaoInicial, variedadeDaCadeia);
-        if(!somatorioValidado){
-            printf("\n\tERRO. O somatorio dos valores no vetor de distribuicao inicial deve totalizar 1.0 (100 porcento). Tente novamente!\n");
+        if(somatorioDeEntradas != 1.0){
+            printf("\n\tERRO. O somatorio dos valores no vetor de distribuicao inicial deve totalizar 1.0 (100 porcento).");
+            printf("\n\tO somatório das entradas resultou em: %lf. Por favor, tente novamente!\n\n", somatorioDeEntradas);
         }
     }
 
     // Entradas para a matriz de Transicao
     printf("\n\nEntradas para a matriz de transicao :\n");
-    for(int i = 0; i < variedadeDaCadeia; i++){
-        double vetorLinhaAtual[variedadeDaCadeia];
-        for(int j = 0; j < variedadeDaCadeia; j++){
+    for(int i = 0; i < tamanhoDoAlfabeto; i++){
+        double somatorioLinhaAtual = 0.0;
+        for(int j = 0; j < tamanhoDoAlfabeto; j++){
             printf("\tTransicao de %d para %d : ", i, j);
             scanf("%lf", &matrizDeTransicao[i][j]);
-            vetorLinhaAtual[i] = matrizDeTransicao[i][j];
+            somatorioLinhaAtual += matrizDeTransicao[i][j];
         }
-        somatorioValidado = somatorioValido(vetorLinhaAtual, variedadeDaCadeia);
-        if(!somatorioValidado){
-            printf("\nERRO! o somatorio dos valores linha da matriz de transicao devem totalizar 1.0 (100 porcento). Tente novamente!\n");
+
+        if(somatorioLinhaAtual != 1.0){
+            printf("\nERRO! o somatorio dos valores linha da matriz de transicao devem totalizar 1.0 (100 porcento).");
+            printf("\n\tO somatório das entradas resultou em: %lf. Por favor, tente novamente!\n\n", somatorioLinhaAtual);
             i--;
         }
         printf("\n");
@@ -219,16 +208,16 @@ int main(){
     // Geracao dos elementos da cadeia
     printf("\n\nGerando elementos da cadeia...");
     printf("\n\tCadeia: ");
-    int elementosGerados = 0;
+    int elementosGerados = 0, ultimoElementoDaCadeia = -1;
     do{
         if(elementosGerados == 0){
-            ultimoElementoDaCadeia = geradorDeElemento(distribuicaoInicial, variedadeDaCadeia);
+            ultimoElementoDaCadeia = geradorDeElemento(distribuicaoInicial, tamanhoDoAlfabeto);
         }else{
-            double copiaDaLinhaDaMatriz[variedadeDaCadeia];
-            for(int i = 0; i < variedadeDaCadeia; i++){
+            double copiaDaLinhaDaMatriz[tamanhoDoAlfabeto];
+            for(int i = 0; i < tamanhoDoAlfabeto; i++){
                 copiaDaLinhaDaMatriz[i] = matrizDeTransicao[ultimoElementoDaCadeia][i];
             }
-            ultimoElementoDaCadeia = geradorDeElemento(copiaDaLinhaDaMatriz, variedadeDaCadeia);
+            ultimoElementoDaCadeia = geradorDeElemento(copiaDaLinhaDaMatriz, tamanhoDoAlfabeto);
         }
         salvarElementoEmArquivo(caminhoParaArquivo, algarismoParaChar(ultimoElementoDaCadeia));
         elementosGerados++;
@@ -241,7 +230,7 @@ int main(){
 
     // Preenchendo distribuicao geral
     printf("\n\nDistribuicao invariante da cadeia :");
-    for(int i = 0; i < variedadeDaCadeia; i++){
+    for(int i = 0; i < tamanhoDoAlfabeto; i++){
         distribuicaoGeral[i] = (double) ocupacaoNaCadeia[i] / (double) tamanhoDaCadeia;
         printf("\n\tElemento %d : %lf", i, distribuicaoGeral[i]);
     }
