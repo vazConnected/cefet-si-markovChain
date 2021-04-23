@@ -141,6 +141,15 @@ void criaContextos(Contexto *contextos, int indiceContextosInicio, int indiceCon
     }
 }
 
+bool charPertenceAoAlfabeto(char c){
+    for(int i = 0; i < tamanhoDoAlfabeto; i++){
+        if(elementosDoAlfabeto[i] == c){
+            return true;
+        }
+    }
+    return false;
+}
+
 int main(){
     imprimirIntro();
 
@@ -151,10 +160,10 @@ int main(){
     // Entrada para o alfabeto da cadeia
     bool entradaRealizadaComSucesso = false;
     while(!entradaRealizadaComSucesso){
-        printf("\n\tDigite o tamanho do alfabeto da cadeia a ser analisada: ");
+        printf("\tDigite o tamanho do alfabeto da cadeia a ser analisada: ");
         scanf("%d", &tamanhoDoAlfabeto);
         if(tamanhoDoAlfabeto < 1 || tamanhoDoAlfabeto > 10){
-            printf("Erro! O tamanho do alfabeto deve ser entre 1 e 10.\nPor favor, tente novamente!");
+            printf("Erro! O tamanho do alfabeto deve ser entre 1 e 10.\nPor favor, tente novamente!\n");
         }else{
             entradaRealizadaComSucesso = true;
         }
@@ -163,10 +172,10 @@ int main(){
     // Entrada para a profundidade da cadeia
     entradaRealizadaComSucesso = false;
     while(!entradaRealizadaComSucesso){
-        printf("\n\tDigite a profundidade a ser analisada: ");
+        printf("\tDigite a profundidade a ser analisada: ");
         scanf("%d", &profundidade);
         if(profundidade < 1){
-            printf("Erro! A profundidade da cadeia deve smaior que 1.\nPor favor, tente novamente!");
+            printf("Erro! A profundidade da cadeia deve smaior que 1.\nPor favor, tente novamente!\n");
         }else{
             entradaRealizadaComSucesso = true;
         }
@@ -199,7 +208,7 @@ int main(){
     char memoriaDaCadeia[profundidade];
     char elementoAtual;
     FILE *arquivo = fopen(caminhoParaArquivo, "r");
-    for(int i = 0; i < profundidade; i++){
+    for(int i = profundidade - 1; i <= 0; i--){
         memoriaDaCadeia[i] = fgetc(arquivo); // Carregando vetor memoria da cadeia
     }
 
@@ -219,7 +228,7 @@ int main(){
                     }
                 }
 
-                if(contextoEncontrado){
+                if(contextoEncontrado && charPertenceAoAlfabeto(elementoAtual)){
                     contextos[i].ocorrenciasDosSubsequentes[charParaAlgarismo(elementoAtual)]++;
                     contextos[i].somatorioDasOcorrenciasDosSubsequentes++;
                     break;
@@ -228,10 +237,12 @@ int main(){
         }
         
         // Reorganizando elementos da memoria da cadeia
-        for(int i = 1; i < profundidade; i++){
-            memoriaDaCadeia[i - 1] = memoriaDaCadeia[i];
+        int indiceMemoriaDaCadeia = profundidade - 2;
+        while(indiceMemoriaDaCadeia >= 0){
+            memoriaDaCadeia[indiceMemoriaDaCadeia + 1] = memoriaDaCadeia[indiceMemoriaDaCadeia];
+            indiceMemoriaDaCadeia--;
         }
-        memoriaDaCadeia[profundidade - 1] = elementoAtual;
+        memoriaDaCadeia[0] = elementoAtual;
 
     }while(elementoAtual != EOF);
     fclose(arquivo);
@@ -246,7 +257,7 @@ int main(){
             }
         }
     }
-
+                
     // Imprimindo Resultados
     printf("\nResultados:");
     for(int i = 0; i < quantidadeDeContextos; i++){
@@ -257,7 +268,12 @@ int main(){
         printf("\t");
 
         for(int j = 0; j < tamanhoDoAlfabeto; j++){
-            printf("subsequente %d : %lf\t", j, contextos[i].razaoDeTransicao[j]);
+            if(contextos[i].razaoDeTransicao[j] == 0.0){
+                printf("subsequente %d : --      \t", j);
+            }else{
+                printf("subsequente %d : %lf\t", j, contextos[i].razaoDeTransicao[j]);
+            }
+            
         }
     }
     printf("\n");
