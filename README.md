@@ -12,9 +12,9 @@
 ## Sumário
 1. [Gerador interativo de Cadeias de Markov](/1-geradorDeCadeia/geradorDeCadeia.c);
 2. [Coletor de informações de uma Cadeia de Markov](/2-coletorDeInformacoes/coletorDeInformacoes.c);
-3. [Coletor de informações de uma Cadeia de Markov com Memória Variável](3-coletorDeInformacoesComMemoria/coletorDeInfoemacoesComMemoria.c).
-4. [Podador de um nível para uma Cadeia de Markov](/4-podadorDeContextosEmUmNivel/podadorDeContextosEmUmNivel.c)
-
+3. [Coletor de informações de uma Cadeia de Markov com Memória Variável](3-coletorDeInformacoesComMemoria/coletorDeInfoemacoesComMemoria.c);
+4. [Podador de um nível para uma Cadeia de Markov](/4-podadorDeContextosEmUmNivel/podadorDeContextosEmUmNivel.c);
+5. [Podador completo de uma Cadeia de Markov](5-podadorCompletoDeContextos/podadorCompletoDeContextos.c).
 
 ## Créditos
 - Autor/Pesquisador: Pedro Vaz ([Lattes](http://lattes.cnpq.br/4701671818864841));
