@@ -136,7 +136,6 @@ void inserirContextoNaListaDeContextos(ListaDeContextos *lista, char* idenficica
 
     novaCelula->contexto = (Contexto*) malloc(sizeof(Contexto));
     novaCelula->contexto->profundidade = profundidade;
-    novaCelula->contexto->podavel = true;
     novaCelula->contexto->somatorioDasOcorrenciasDosSubsequentes = 0;
 
     novaCelula->contexto->ocorrenciasDosSubsequentes = (unsigned int*) calloc(tamanhoDoAlfabeto, sizeof(unsigned int));
@@ -146,103 +145,13 @@ void inserirContextoNaListaDeContextos(ListaDeContextos *lista, char* idenficica
     strncpy(novaCelula->contexto->identificacao, idenficicacao, profundidade);
 
     novaCelula->proximo = NULL;
-
-    novaCelula->disabled = false;
+    novaCelula->desabilitado = false;
 
     if(listaDeContextosEstaVazia(lista)){
         lista->inicio = lista->fim  = novaCelula;
-    }else{ // erro esta aqui
+    }else{ // 
         lista->fim = lista->fim->proximo = novaCelula;
     }
-}
-
-void removerDaLista_identificacao(ListaDeContextos *lista, char* identificacao, int profundidade){ //aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    if(profundidade > 0){
-        Celula* celulaAnterior = NULL;
-        Celula* celulaAtual = lista->inicio;
-
-        while(celulaAtual != NULL){
-
-            if(profundidade == celulaAtual->contexto->profundidade){
-                bool celulaEncontrada = true;
-                for(int i = 0; i < profundidade; i++){
-                    if(identificacao[i] != celulaAtual->contexto->identificacao[i]){
-                        celulaEncontrada = false;
-                    }
-                }
-
-                if(celulaEncontrada){
-                    Celula* celulaSubsequente = celulaAtual->proximo;
-
-                    if(celulaSubsequente == NULL){
-                        lista->fim = celulaAnterior;
-                    }
-
-                    if(celulaAtual != NULL){
-                        free(celulaAtual);
-                    }
-
-                    if(celulaAnterior == NULL){
-                        lista->inicio = celulaSubsequente;
-                    }else{
-                        celulaAnterior->proximo = celulaSubsequente;
-                    }
-
-                }
-            }
-
-            celulaAnterior = celulaAtual;
-            celulaAtual = celulaAtual->proximo;
-        }
-    }
-}
-
-void removerDaLista_indice(ListaDeContextos *lista, int indice){
-    if(indice >= 0 && !listaDeContextosEstaVazia(lista)){
-        
-        printf("\n\tREMOVENDO INDICE: %d ", indice);
-
-        if(indice == 0){
-            if(lista->inicio->proximo != NULL){
-                Celula* novoInicio = lista->inicio->proximo;
-                free(lista->inicio);
-                lista->inicio = novoInicio;
-            }else{
-                free(lista->inicio);
-                lista->inicio = lista->fim = NULL;
-            }
-        }else{
-            int contadorIndice = 0;
-
-            Celula* celulaAtual = lista->inicio;
-            while(celulaAtual != NULL){
-
-                if(indice == contadorIndice - 1){
-                    Celula* removida = celulaAtual->proximo;
-                    Celula* anterior = celulaAtual;
-                    Celula* subsequente = celulaAtual->proximo->proximo;
-
-                    if(subsequente == NULL){
-                        lista->fim = anterior;
-                        anterior->proximo = NULL;
-                    }else{
-                        anterior->proximo = subsequente;
-                    }
-
-                    if(removida != NULL){
-                        free(removida);
-                    }
-
-                    printf(" REMOVIDO");
-                    return;
-                }
-
-                contadorIndice++;
-                celulaAtual = celulaAtual->proximo;
-            }
-        } 
-    }
-    printf(" NAO REMOVIDO");
 }
 
 void registrarOcorrenciaDeContexto(ListaDeContextos *lista, int subsequente, char *identificacao, int profundidade){

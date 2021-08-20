@@ -7,11 +7,10 @@ typedef struct{
     unsigned int *ocorrenciasDosSubsequentes;
     double *razaoDeTransicao;
     unsigned int somatorioDasOcorrenciasDosSubsequentes;
-    bool podavel;
 }Contexto;
 
 typedef struct celula{
-    bool disabled;
+    bool desabilitado; // ignora contexto
     Contexto* contexto;
     struct celula* proximo;
 }Celula;
@@ -24,7 +23,6 @@ typedef struct{
 typedef struct{
     char* identificacao;
     int profundidade;
-    bool ignorar;
 }IdentificacaoDosContextos;
 
 typedef struct{
@@ -53,10 +51,6 @@ void inicializarListaDeContextos(ListaDeContextos *lista);
 bool listaDeContextosEstaVazia(ListaDeContextos *lista);
 
 void inserirContextoNaListaDeContextos(ListaDeContextos *lista, char* idenficicacao, int profundidade, int tamanhoDoAlfabeto);
-
-void removerDaLista_identificacao(ListaDeContextos *lista, char* identificacao, int profundidade);
-
-void removerDaLista_indice(ListaDeContextos *lista, int indice);
 
 void registrarOcorrenciaDeContexto(ListaDeContextos *lista, int subsequente, char *identificacao, int profundidade);
 

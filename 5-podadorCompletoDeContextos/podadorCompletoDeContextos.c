@@ -18,7 +18,6 @@
 
 #include "lib/listaDeContextos.h"
 
-
 char* elementosDoAlfabeto;
 int tamanhoDoAlfabeto = 0;
 
@@ -36,7 +35,7 @@ void imprimirIntro(){
     printf("\nPodador de contextos");
     printf("\nDescricao: analisar uma cadeia e apresentar os contextos com poda ate a raiz;");
     printf("\nAutor: Pedro Henrique Estevam Vaz de Melo;");
-    printf("\nData: maio de 2020.\n\n");
+    printf("\nData: julho de 2020.\n\n");
 }
 
 void entrada_caminhoParaArquivo(char* caminhoParaArquivo){
@@ -188,6 +187,26 @@ void criaContextos(IdentificacaoDosContextos* contextos, int indiceContextosInic
     }
 }
 
+bool contextoPossuiDescendentes(char* contexto_parent, int profundidade_parent, ListaDeContextos contextosProfundidadeMais1){
+    Celula* celulaAtual = contextosProfundidadeMais1.inicio;
+    while (celulaAtual != NULL){
+        bool descendenteEncontrado = true;
+        for(int i_child = 1, i_parent = 0; i_parent < profundidade_parent; i_child++, i_parent++){
+            if(contexto_parent[i_parent] != celulaAtual->contexto->identificacao[i_child]){
+                descendenteEncontrado = false;
+            }
+        }
+        
+        if(descendenteEncontrado && celulaAtual->desabilitado == false){
+            return descendenteEncontrado;
+        }
+
+        celulaAtual = celulaAtual->proximo;
+    }
+
+    return false;
+}
+
 int main(){
     imprimirIntro();
 
@@ -312,7 +331,7 @@ int main(){
     for(int indiceListas = 0; indiceListas < profundidade; indiceListas++){
         calculaRazaoDeTransicao(&listas[indiceListas], tamanhoDoAlfabeto);
     }
-    //int contador1 = 0;
+    
     // Imprime estado dos contextos antes da poda
     printf("\n\nContextos antes da poda: ");
     for(int indiceListas = 0; indiceListas < profundidade; indiceListas++){
@@ -339,16 +358,15 @@ int main(){
     }    
 
     // Podando contextos
-    int indiceVetorListasDeContexto = profundidade - 1;
+    int indiceVetorListasDeContexto = profundidade - 1; // Inicia da pnultima profundidade
     while(indiceVetorListasDeContexto > 0){
-        Celula* celulaAtual_parent = listas[indiceVetorListasDeContexto - 1].inicio;
+        Celula* celulaAtual_parent = listas[indiceVetorListasDeContexto - 1].inicio; // Inicia do pnultimo nivel
         
         while(celulaAtual_parent != NULL){
-            
             PacoteCelula* celulas_child;
             int qtdCelulas_child = 0;
 
-            // Adquire celulas "depentendes" da celulaAtual_parent
+            // Adquire celulas descendentes da celulaAtual_parent
             Celula* celulaAtual_child = listas[indiceVetorListasDeContexto].inicio;
             while(celulaAtual_child != NULL){
 
@@ -369,26 +387,51 @@ int main(){
                 celulaAtual_child = celulaAtual_child->proximo;
             }
             
-            // Desabilita contextos podaveis
+            // Desabilita contextos podados
             if(qtdCelulas_child != 0){
+                double maxDiferenca = 0.0;
 
-                for(int indiceContexto = 0; indiceContexto < qtdCelulas_child; indiceContexto++){
-                    double maxDiferenca = 0.0;
-                    for(int idSubsequente = 0; idSubsequente < tamanhoDoAlfabeto; idSubsequente++){
-                        double diferencaAtual = fabs(celulaAtual_parent->contexto->razaoDeTransicao[idSubsequente] - celulas_child[indiceContexto].celula->contexto->razaoDeTransicao[idSubsequente]);
-                        if(maxDiferenca < diferencaAtual){
+                // Calcula maior diferenca para o ramo atual
+                for(int indiceContexto_child = 0; indiceContexto_child < qtdCelulas_child; indiceContexto_child++){
+
+                    for(int subsequente = 0; subsequente < tamanhoDoAlfabeto; subsequente++){
+                        double razaoChild = celulas_child[indiceContexto_child].celula->contexto->razaoDeTransicao[subsequente];
+                        double razaoParent = celulaAtual_parent->contexto->razaoDeTransicao[subsequente];
+                        double diferencaAtual = fabs(razaoChild - razaoParent); 
+
+                        if(diferencaAtual > maxDiferenca){
                             maxDiferenca = diferencaAtual;
                         }
                     }
+                }
 
-                    if(maxDiferenca < erro || celulas_child[indiceContexto].celula->contexto->somatorioDasOcorrenciasDosSubsequentes == 0){
-                        celulas_child[indiceContexto].celula->disabled = true;
+                // Poda do ramo - Valida hipotese nula
+                if(maxDiferenca < erro){
+                    for(int contadorChild = 0; contadorChild < qtdCelulas_child; contadorChild++){
+                        if(indiceVetorListasDeContexto == profundidade - 1){  // descendentes pertencem ao ultimo nivel
+                            celulas_child[contadorChild].celula->desabilitado = true;
+                        } else {
+                            int indiceDescendentesDosDescendentes = indiceVetorListasDeContexto + 1;
+                            if(!contextoPossuiDescendentes(celulas_child[contadorChild].celula->contexto->identificacao, celulas_child[contadorChild].celula->contexto->profundidade, listas[indiceDescendentesDosDescendentes])){
+                                celulas_child[contadorChild].celula->desabilitado = true;
+                            }  
+                        }
+                    }
+
+                } else {
+                    // Desabilita nos descendentes sem ocorrencia
+                    for(int contadorChild = 0; contadorChild < qtdCelulas_child; contadorChild++){
+                        if(celulas_child[contadorChild].celula->contexto->somatorioDasOcorrenciasDosSubsequentes == 0){
+                            celulas_child[contadorChild].celula->desabilitado = true;
+                        }
                     }
                 }
+
             }
             
             celulaAtual_parent = celulaAtual_parent->proximo;
         }
+
         indiceVetorListasDeContexto--;
     }
 
@@ -401,7 +444,7 @@ int main(){
         Celula *celulaAtual = listas[indiceListas].inicio;
         while(celulaAtual != NULL){
             //if(celulaAtual->disabled) contador2++;
-            if(!celulaAtual->disabled){
+            if(!celulaAtual->desabilitado){
                 printf("\n\t  Id. (w): ");
                 for(int indiceIdenficacao = 0; indiceIdenficacao < indiceListas + 1; indiceIdenficacao++){
                     printf("%c", celulaAtual->contexto->identificacao[indiceIdenficacao]);
@@ -421,6 +464,5 @@ int main(){
         printf("\n");
     }    
   
-    //printf("\ndiferenca = %d", contador1 - contador2);
     return 0;
 }
