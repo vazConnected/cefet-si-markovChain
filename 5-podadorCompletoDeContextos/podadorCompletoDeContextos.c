@@ -339,7 +339,6 @@ int main(){
         Celula *celulaAtual = listas[indiceListas].inicio;
         
         while(celulaAtual != NULL){
-            //if(celulaAtual->contexto->somatorioDasOcorrenciasDosSubsequentes != 0) contador1++;
             printf("\n\t  Id. (w): ");
             for(int indiceIdenficacao = 0; indiceIdenficacao < indiceListas + 1; indiceIdenficacao++){
                 printf("%c", celulaAtual->contexto->identificacao[indiceIdenficacao]);
@@ -348,9 +347,9 @@ int main(){
             
             for(int indiceRazaoTransicao = 0; indiceRazaoTransicao < tamanhoDoAlfabeto; indiceRazaoTransicao++){
                 if(celulaAtual->contexto->razaoDeTransicao[indiceRazaoTransicao] > 0)
-                    printf("p(w|%d): %lf\t", indiceRazaoTransicao, celulaAtual->contexto->razaoDeTransicao[indiceRazaoTransicao]);
+                    printf("p(%d|w): %lf\t", indiceRazaoTransicao, celulaAtual->contexto->razaoDeTransicao[indiceRazaoTransicao]);
                 else
-                    printf("p(w|%d): --      \t", indiceRazaoTransicao);
+                    printf("p(%d|w): --      \t", indiceRazaoTransicao);
             }
             celulaAtual = celulaAtual->proximo;
         }
@@ -408,14 +407,16 @@ int main(){
                 // Poda do ramo - Valida hipotese nula
                 if(maxDiferenca < erro){
                     for(int contadorChild = 0; contadorChild < qtdCelulas_child; contadorChild++){
-                        if(indiceVetorListasDeContexto == profundidade - 1){  // descendentes pertencem ao ultimo nivel
-                            celulas_child[contadorChild].celula->desabilitado = true;
-                        } else {
-                            int indiceDescendentesDosDescendentes = indiceVetorListasDeContexto + 1;
+                        int indiceDescendentesDosDescendentes = indiceVetorListasDeContexto + 1;
+
+                        if (indiceDescendentesDosDescendentes < profundidade){
                             if(!contextoPossuiDescendentes(celulas_child[contadorChild].celula->contexto->identificacao, celulas_child[contadorChild].celula->contexto->profundidade, listas[indiceDescendentesDosDescendentes])){
                                 celulas_child[contadorChild].celula->desabilitado = true;
                             }  
+                        } else {
+                            celulas_child[contadorChild].celula->desabilitado = true;
                         }
+
                     }
 
                 } else {
@@ -435,7 +436,6 @@ int main(){
         indiceVetorListasDeContexto--;
     }
 
-    
     // Imprimindo depois da poda
     printf("\n\nContextos depois da poda: ");
     //int contador2=0;
@@ -453,9 +453,9 @@ int main(){
                 
                 for(int indiceRazaoTransicao = 0; indiceRazaoTransicao < tamanhoDoAlfabeto; indiceRazaoTransicao++){
                     if(celulaAtual->contexto->razaoDeTransicao[indiceRazaoTransicao] > 0)
-                        printf("p(w|%d): %lf\t", indiceRazaoTransicao, celulaAtual->contexto->razaoDeTransicao[indiceRazaoTransicao]);
+                        printf("p(%d|w): %lf\t", indiceRazaoTransicao, celulaAtual->contexto->razaoDeTransicao[indiceRazaoTransicao]);
                     else
-                        printf("p(w|%d): --      \t", indiceRazaoTransicao);
+                        printf("p(%d|w): --      \t", indiceRazaoTransicao);
                 }
             }
             
