@@ -462,7 +462,16 @@ int main(){
             celulaAtual = celulaAtual->proximo;
         }
         printf("\n");
-    }    
+    }
+    
+    while(true){
+        char sair = 'a';
+        printf("\nFinalizar programa? (Y/N)\n");
+        scanf("%c", &sair);
+        if (sair == 'y' || sair == 'Y'){
+            break;
+        }
+    }
   
     return 0;
 }
